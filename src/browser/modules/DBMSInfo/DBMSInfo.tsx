@@ -21,10 +21,7 @@ import React, { useState } from 'react'
 import { connect } from 'react-redux'
 import { withBus } from 'react-suber'
 
-import DatabaseKernelInfo from './DatabaseKernelInfo'
-import { DatabaseSelector } from './DatabaseSelector'
 import { LabelItems, PropertyItems, RelationshipItems } from './MetaItems'
-import { UserDetails } from './UserDetails'
 import {
   Drawer,
   DrawerBody,
@@ -33,16 +30,12 @@ import {
 } from 'browser-components/drawer/drawer-styled'
 import {
   commandSources,
-  executeCommand,
-  useDbCommand
+  executeCommand
 } from 'shared/modules/commands/commandsDuck'
-import { getUseDb } from 'shared/modules/connections/connectionsDuck'
-import { getCurrentUser } from 'shared/modules/currentUser/currentUserDuck'
 import {
   forceCount,
   getCountAutomaticRefreshLoading,
-  getCountAutomaticRefreshEnabled,
-  getUniqueDatbases
+  getCountAutomaticRefreshEnabled
 } from 'shared/modules/dbMeta/dbMetaDuck'
 import { getGraphStyleData } from 'shared/modules/grass/grassDuck'
 import { Button } from '@neo4j-ndl/react'
@@ -69,21 +62,15 @@ export function DBMSInfo(props: any): JSX.Element {
     labels = [],
     relationshipTypes = [],
     properties = [],
-    databaseKernelInfo,
     nodes,
     relationships
   } = props.meta
-  const { user, onItemClick, onDbSelect, useDb, uniqueDatabases = [] } = props
+  const { onItemClick } = props
 
   return (
     <Drawer id="db-drawer">
       <DrawerHeader>Database Information</DrawerHeader>
       <DrawerBody>
-        <DatabaseSelector
-          uniqueDatabases={uniqueDatabases}
-          selectedDb={useDb ?? ''}
-          onChange={onDbSelect}
-        />
         {!props.countAutoRefreshing && (
           <>
             <p>
@@ -126,29 +113,17 @@ export function DBMSInfo(props: any): JSX.Element {
           onMoreClick={onMorePropertiesClick}
           moreStep={moreStep}
         />
-        <UserDetails user={user} onItemClick={onItemClick} />
-        <DatabaseKernelInfo
-          databaseKernelInfo={databaseKernelInfo}
-          onItemClick={onItemClick}
-        />
       </DrawerBody>
     </Drawer>
   )
 }
 
 const mapStateToProps = (state: any) => {
-  const useDb = getUseDb(state)
   const countAutoRefreshing = getCountAutomaticRefreshEnabled(state)
   const countLoading = getCountAutomaticRefreshLoading(state)
-
-  const uniqueDatabases = getUniqueDatbases(state)
-
   return {
     graphStyleData: getGraphStyleData(state),
     meta: state.meta,
-    user: getCurrentUser(state),
-    useDb,
-    uniqueDatabases,
     countAutoRefreshing,
     countLoading
   }
@@ -161,11 +136,7 @@ const mapDispatchToProps = (dispatch: any, ownProps: any) => {
     },
     forceCount: () => {
       dispatch(forceCount())
-    },
-    onDbSelect: (dbName: any) =>
-      dispatch(executeCommand(`:${useDbCommand} ${dbName || ''}`), {
-        source: commandSources.button
-      })
+    }
   }
 }
 

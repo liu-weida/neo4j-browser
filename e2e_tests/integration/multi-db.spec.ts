@@ -28,14 +28,6 @@ describe('Multi database', () => {
     cy.get('[data-testid="dbs-command-list"] li', {
       timeout: 5000
     })
-  const databaseOptionListOptions = () =>
-    cy.get('[data-testid="database-selection-list"] option', {
-      timeout: 5000
-    })
-  const databaseOptionList = () =>
-    cy.get('[data-testid="database-selection-list"]', {
-      timeout: 5000
-    })
 
   before(() => {
     cy.visit(Cypress.config('url')).title().should('include', 'Neo4j Browser')
@@ -82,55 +74,7 @@ describe('Multi database', () => {
       editor().contains('neo4j$')
     })
 
-    it('lists databases in sidebar', () => {
-      cy.executeCommand(':clear')
-      cy.get('[data-testid="navigationDBMS"]').click()
-      databaseOptionListOptions().should('have.length', 2)
-      cy.get('[data-testid="navigationDBMS"]').click()
-    })
-
-    if (isEnterpriseEdition()) {
-      it('adds databases to the sidebar and adds backticks to special db names', () => {
-        // Add db
-        cy.executeCommand(':use system')
-        cy.createDatabase('`name-with-dash`')
-
-        // Count items in list
-        cy.get('[data-testid="navigationDBMS"]').click()
-        databaseOptionListOptions().should('have.length', 3)
-        databaseOptionListOptions().contains('system')
-        databaseOptionListOptions().contains('neo4j')
-        databaseOptionListOptions().contains('name-with-dash')
-
-        // Select to use db, make sure backticked
-        databaseOptionList().select('name-with-dash')
-        cy.get('[data-testid="frameCommand"]', { timeout: 10000 }).contains(
-          ':use `name-with-dash`'
-        )
-        cy.resultContains(
-          'Queries from this point and forward are using the database'
-        )
-
-        // Try without backticks
-        cy.executeCommand(':use system')
-        cy.resultContains(
-          'Queries from this point and forward are using the database'
-        )
-        cy.executeCommand(':clear')
-        cy.executeCommand(':use name-with-dash')
-        cy.resultContains(
-          'Queries from this point and forward are using the database'
-        )
-
-        // Cleanup
-        cy.executeCommand(':use system')
-        cy.executeCommand('DROP DATABASE `name-with-dash`')
-        cy.wait(1000)
-        cy.resultContains('1 system update, no records')
-        databaseOptionListOptions().should('have.length', 2)
-        cy.get('[data-testid="navigationDBMS"]').click()
-      })
-    }
+    // Database selection in sidebar removed
 
     it('lists databases with :dbs command', () => {
       cy.executeCommand(':clear')
