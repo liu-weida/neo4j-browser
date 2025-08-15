@@ -120,8 +120,8 @@ describe('Neo4j Browser', () => {
       isAura()
         ? 'PUBLIC'
         : isEnterpriseEdition() || Cypress.config('serverVersion') < 4.0
-        ? 'admin'
-        : '-'
+          ? 'admin'
+          : '-'
     )
     cy.executeCommand(':clear')
     cy.executeCommand(':server disconnect')
@@ -135,38 +135,11 @@ describe('Neo4j Browser', () => {
       isAura()
         ? 'PUBLIC'
         : isEnterpriseEdition() || Cypress.config('serverVersion') < 4.0
-        ? 'admin'
-        : '-'
+          ? 'admin'
+          : '-'
     )
     cy.get('[data-testid="navigationDBMS"]').click()
   })
-
-  // Browser sync is disabled on Aura
-  if (!isAura()) {
-    it('will clear local storage when clicking "Clear local data"', () => {
-      cy.connect('neo4j', Cypress.config('password'))
-
-      cy.get(Editor).type(`RETURN 1{enter}`, { force: true })
-
-      cy.get('[data-testid="frame-Favorite"]').click()
-      cy.get('[data-testid="savedScriptListItem"]').first().contains('RETURN 1')
-
-      cy.get('[data-testid="navigationSync"]').click()
-      cy.get('[data-testid="clearLocalData"]').click()
-      cy.wait(500)
-
-      // confirm clear
-      cy.get('[data-testid="clearLocalData"]').click()
-
-      cy.get('[data-testid="navigationFavorites"]').click()
-
-      cy.get('[data-testid="savedScriptListItem"]').should('have.length', 0)
-      cy.get('[data-testid="navigationFavorites"]').click()
-
-      // once data is cleared the user is logged out and the connect form is displayed
-      cy.get('input[data-testid="boltaddress"]')
-    })
-  }
 
   it('displays no user info in sidebar (when not connected)', () => {
     cy.executeCommand(':server disconnect')

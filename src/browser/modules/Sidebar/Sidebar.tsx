@@ -21,30 +21,17 @@ import React from 'react'
 import { connect } from 'react-redux'
 
 import {
-  AboutIcon,
-  CloudSyncIcon,
   DatabaseIcon,
-  DocumentsIcon,
-  FavoritesIcon,
-  GuideDrawerIcon,
   ProjectFilesIcon,
   SettingsIcon
 } from 'browser-components/icons/LegacyIcons'
 
 import DatabaseDrawer from '../DBMSInfo/DBMSInfo'
-import BrowserSync from '../Sync/BrowserSync'
-import AboutDrawer from './About'
-import DocumentsDrawer from './Documents'
-import GuideDrawer from './GuideDrawer'
 import ProjectFilesDrawer from './ProjectFiles'
 import UserSettingsDrawer from './UserSettings'
-import Favorites from './favorites'
-import StaticScripts from './static-scripts'
 import TabNavigation, {
-  NavItem,
-  STANDARD_DRAWER_WIDTH
+  NavItem
 } from 'browser-components/TabNavigation/Navigation'
-import { DrawerHeader } from 'browser-components/drawer/drawer-styled'
 import { GlobalState } from 'shared/globalState'
 import { isRelateAvailable } from 'shared/modules/app/appDuck'
 import {
@@ -52,17 +39,12 @@ import {
   DISCONNECTED_STATE,
   PENDING_STATE
 } from 'shared/modules/connections/connectionsDuck'
-import { utilizeBrowserSync } from 'shared/modules/features/featuresDuck'
 import { getCurrentDraft } from 'shared/modules/sidebar/sidebarDuck'
-import { isUserSignedIn } from 'shared/modules/sync/syncDuck'
 
 interface SidebarProps {
   selectedDrawerName: string
   onNavClick: () => void
   neo4jConnectionState: string
-  showStaticScripts: boolean
-  syncConnected: boolean
-  loadSync: boolean
   isRelateAvailable: boolean
   scriptDraft: string | null
 }
@@ -71,9 +53,6 @@ const Sidebar = ({
   selectedDrawerName,
   onNavClick,
   neo4jConnectionState,
-  showStaticScripts,
-  syncConnected,
-  loadSync,
   isRelateAvailable,
   scriptDraft
 }: SidebarProps) => {
@@ -93,22 +72,6 @@ const Sidebar = ({
       },
       content: DatabaseDrawer
     },
-    {
-      name: 'Favorites',
-      title: 'Favorites',
-      icon: function favIcon(isOpen: boolean): JSX.Element {
-        return <FavoritesIcon isOpen={isOpen} title="Favorites" />
-      },
-      content: function FavoritesDrawer(): JSX.Element {
-        return (
-          <div style={{ width: STANDARD_DRAWER_WIDTH }}>
-            <DrawerHeader> Favorites </DrawerHeader>
-            <Favorites />
-            {showStaticScripts && <StaticScripts />}
-          </div>
-        )
-      }
-    },
     ...(isRelateAvailable
       ? [
           {
@@ -122,41 +85,10 @@ const Sidebar = ({
             }
           }
         ]
-      : []),
-    {
-      name: 'Guides',
-      title: 'Guides',
-      icon: function GuideDrawerIconComp(isOpen: boolean): JSX.Element {
-        return <GuideDrawerIcon isOpen={isOpen} />
-      },
-      content: GuideDrawer
-    }
+      : [])
   ]
 
   const bottomNavItems: NavItem[] = [
-    {
-      name: 'Documents',
-      title: 'Help &amp; Resources',
-      icon: function docsIcon(isOpen: boolean): JSX.Element {
-        return <DocumentsIcon isOpen={isOpen} title="Help &amp; Resources" />
-      },
-      content: DocumentsDrawer,
-      enableCannyBadge: true
-    },
-    {
-      name: 'Sync',
-      title: 'Browser Sync',
-      icon: function syncIcon(isOpen: boolean): JSX.Element {
-        return (
-          <CloudSyncIcon
-            isOpen={isOpen}
-            connected={syncConnected}
-            title="Browser Sync"
-          />
-        )
-      },
-      content: BrowserSync
-    },
     {
       name: 'Settings',
       title: 'Settings',
@@ -164,16 +96,8 @@ const Sidebar = ({
         return <SettingsIcon isOpen={isOpen} title="Browser Settings" />
       },
       content: UserSettingsDrawer
-    },
-    {
-      name: 'About',
-      title: 'About Neo4j',
-      icon: function aboutIcon(isOpen: boolean): JSX.Element {
-        return <AboutIcon isOpen={isOpen} title="About Neo4j" />
-      },
-      content: AboutDrawer
     }
-  ].filter(({ name }) => loadSync || name !== 'Sync')
+  ]
 
   return (
     <TabNavigation
@@ -201,10 +125,7 @@ const mapStateToProps = (state: GlobalState) => {
     }
   }
   return {
-    syncConnected: isUserSignedIn(state) || false,
     neo4jConnectionState: connectionState,
-    loadSync: utilizeBrowserSync(state),
-    showStaticScripts: state.settings.showSampleScripts,
     isRelateAvailable: isRelateAvailable(state),
     scriptDraft: getCurrentDraft(state)
   }
