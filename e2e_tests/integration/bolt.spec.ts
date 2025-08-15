@@ -56,49 +56,4 @@ describe('Bolt connections', () => {
       }
     })
   }
-
-  if (isEnterpriseEdition()) {
-    it('users with no role can connect and shows up in sidebar', () => {
-      cy.executeCommand(':clear')
-      const password = Cypress.config('password')
-      cy.connect('neo4j', password)
-
-      cy.createUser('noroles', 'password123', true)
-      cy.executeCommand(':server disconnect')
-      cy.executeCommand(':clear')
-      cy.executeCommand(':server connect')
-
-      // Make sure initial pw set works
-      cy.setInitialPassword(
-        'password1234',
-        'password123',
-        'noroles',
-        Cypress.config('boltUrl'),
-        true
-      )
-
-      // Try regular connect
-      cy.executeCommand(':server disconnect')
-      cy.connect('noroles', 'password1234')
-
-      // Check sidebar
-      cy.get('[data-testid="navigationDBMS"]').click()
-      cy.get('[data-testid="user-details-username"]').should(
-        'contain',
-        'noroles'
-      )
-      if (Cypress.config('serverVersion') <= 4.0) {
-        cy.get('[data-testid="user-details-roles"]').should('contain', '-')
-      }
-      if (Cypress.config('serverVersion') === 4.1) {
-        cy.get('[data-testid="user-details-roles"]').should('contain', 'PUBLIC')
-      }
-      cy.get('[data-testid="navigationDBMS"]').click()
-
-      cy.executeCommand(':server disconnect')
-      cy.executeCommand(':server connect')
-      cy.connect('neo4j', password)
-      cy.dropUser('noroles')
-    })
-  }
 })

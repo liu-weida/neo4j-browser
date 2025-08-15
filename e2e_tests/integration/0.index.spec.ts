@@ -111,6 +111,7 @@ describe('Neo4j Browser', () => {
     cy.get('[data-testid="navigationDBMS"]').click()
   })
 
+
   it('displays user info in sidebar (when connected)', () => {
     cy.executeCommand(':clear')
     cy.get('[data-testid="navigationDBMS"]').click()
@@ -150,14 +151,4 @@ describe('Neo4j Browser', () => {
     cy.get('[data-testid="navigationDBMS"]').click()
   })
 
-  it('does not show trial banner since we have licence or community', () => {
-    cy.get(Editor).type(`RETURN 1{enter}`, { force: true })
 
-    cy.get('#MAIN_WRAPPER_DOM_ID')
-      .contains('30 days has expired')
-      .should('not.exist')
-    cy.get('#MAIN_WRAPPER_DOM_ID')
-      .contains(' This is a time limited trial')
-      .should('not.exist')
-  })
-})

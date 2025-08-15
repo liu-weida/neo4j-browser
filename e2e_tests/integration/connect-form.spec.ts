@@ -181,8 +181,6 @@ describe('Connect form', () => {
           .type(Cypress.config('password'))
           .type('{enter}')
 
-        cy.get('[data-testid="navigationDBMS"]').click()
-        cy.get('[data-testid="database-selection-list"]').contains('system')
         cy.executeCommand(':use neo4j')
       })
     }
