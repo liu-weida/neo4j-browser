@@ -111,14 +111,44 @@ describe('Neo4j Browser', () => {
     cy.get('[data-testid="navigationDBMS"]').click()
   })
 
-  it('does not show trial banner since we have licence or community', () => {
-    cy.get(Editor).type(`RETURN 1{enter}`, { force: true })
 
-    cy.get('#MAIN_WRAPPER_DOM_ID')
-      .contains('30 days has expired')
-      .should('not.exist')
-    cy.get('#MAIN_WRAPPER_DOM_ID')
-      .contains(' This is a time limited trial')
-      .should('not.exist')
+  it('displays user info in sidebar (when connected)', () => {
+    cy.executeCommand(':clear')
+    cy.get('[data-testid="navigationDBMS"]').click()
+    cy.get('[data-testid="user-details-username"]').should('contain', 'neo4j')
+    cy.get('[data-testid="user-details-roles"]', { timeout: 30000 }).should(
+      'contain',
+      isAura()
+        ? 'PUBLIC'
+        : isEnterpriseEdition() || Cypress.config('serverVersion') < 4.0
+          ? 'admin'
+          : '-'
+    )
+    cy.executeCommand(':clear')
+    cy.executeCommand(':server disconnect')
+    cy.get('[data-testid="user-details-username"]').should('have.length', 0)
+    cy.get('[data-testid="user-details-roles"]').should('have.length', 0)
+    cy.connect('neo4j', Cypress.config('password'))
+    cy.executeCommand(':clear')
+    cy.get('[data-testid="user-details-username"]').should('contain', 'neo4j')
+    cy.get('[data-testid="user-details-roles"]').should(
+      'contain',
+      isAura()
+        ? 'PUBLIC'
+        : isEnterpriseEdition() || Cypress.config('serverVersion') < 4.0
+          ? 'admin'
+          : '-'
+    )
+    cy.get('[data-testid="navigationDBMS"]').click()
   })
-})
+
+  it('displays no user info in sidebar (when not connected)', () => {
+    cy.executeCommand(':server disconnect')
+    cy.executeCommand(':clear')
+    cy.get('[data-testid="navigationDBMS"]').click()
+    cy.get('[data-testid="user-details-username"]').should('have.length', 0)
+    cy.get('[data-testid="user-details-roles"]').should('have.length', 0)
+    cy.get('[data-testid="navigationDBMS"]').click()
+  })
+
+
